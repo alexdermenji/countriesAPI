@@ -5,6 +5,10 @@ const countriesContainer = document.querySelector('.countries');
 
 ///////////////////////////////////////
 
+const renderError = function (msg) {
+  countriesContainer.insertAdjacentText('beforeend', msg);
+};
+
 const renderCountry = function (data, className = '') {
   const html = `<article class="country ${className}">
   <img class="country__img" src="${data.flag}" />
@@ -19,7 +23,6 @@ const renderCountry = function (data, className = '') {
   </div>
 </article>`;
   countriesContainer.insertAdjacentHTML('beforeend', html);
-  countriesContainer.style.opacity = 1;
 };
 
 const getCountryData = function (country) {
@@ -34,7 +37,13 @@ const getCountryData = function (country) {
           .then(response => response.json())
           .then(data => renderCountry(data, 'neighbour'));
       }
+    })
+    .catch(err => renderError(`Something is wrong ${err.message}`))
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
     });
 };
 
-getCountryData('germany');
+btn.addEventListener('click', function () {
+  getCountryData('germany');
+});

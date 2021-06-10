@@ -25,17 +25,30 @@ const renderCountry = function (data, className = '') {
   countriesContainer.insertAdjacentHTML('beforeend', html);
 };
 
+const getJSON = function (url, errMsg = 'Somethiong is wrong') {
+  return fetch(url).then(response => {
+    if (!response.ok) {
+      throw new Error(errMsg);
+    }
+    return response.json();
+  });
+};
+
 const getCountryData = function (country) {
-  fetch(`https://restcountries.eu/rest/v2/name/${country}`)
-    .then(response => response.json())
+  getJSON(
+    `https://restcountries.eu/rest/v2/name/${country}`,
+    'Country was not found'
+  )
     .then(data => {
       renderCountry(data[0]);
-      const neighbour = data[0].borders;
-      if (!neighbour) return;
+      const neighbour = data[0].borders[0];
+
+      if (!neighbour) throw new Error('No neighbours found');
       for (let i = 0; i < neighbour.length; i++) {
-        fetch(`https://restcountries.eu/rest/v2/alpha/${neighbour[i]}`)
-          .then(response => response.json())
-          .then(data => renderCountry(data, 'neighbour'));
+        getJSON(
+          `https://restcountries.eu/rest/v2/alpha/${neighbour[i]}`,
+          'country was not found'
+        ).then(data => renderCountry(data, 'neighbour'));
       }
     })
     .catch(err => renderError(`Something is wrong ${err.message}`))
@@ -45,5 +58,5 @@ const getCountryData = function (country) {
 };
 
 btn.addEventListener('click', function () {
-  getCountryData('germany');
+  getCountryData('australia');
 });
